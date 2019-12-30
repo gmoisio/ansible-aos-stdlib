@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/gmoisio/ansible-aos-stdlib.svg?branch=master)](https://travis-ci.org/gmoisio/ansible-aos-stdlib)
+[![Ansible Galaxy](https://img.shields.io/badge/ansible--galaxy-ale_aos-blue.svg)](https://galaxy.ansible.com/gmoisio/ale_aos)
+
 ALE_AOS
 =======
 
