@@ -15,7 +15,7 @@ Example Playbook
     hosts: ale
     connection: local
     roles:
-      - ale_aos
+      - gmoisio.ale_aos
     vars:
       ansible_python_interpreter: "python"
     tasks:
