@@ -10,6 +10,7 @@ galaxy_info:
         - all
   galaxy_tags:
   - networking
+  - omniswitch
   - aos
   - ale
 dependencies: []

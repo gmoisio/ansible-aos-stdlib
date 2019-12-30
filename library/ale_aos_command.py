@@ -33,10 +33,11 @@ DOCUMENTATION = '''
 ---
 module: ale_aos_command
 author: Gilbert MOISIO
-version_added: "0.1"
-short_description: Send a command an ALE OmniSwitch device.
+version_added: "0.1.2"
+short_description: Send a command to an ALE OmniSwitch device.
 description:
-    - Connect to an OmniSwitch device and send a command.
+    - Connect to an OmniSwitch device and send a command. It can search for a
+      string.
 requirements:
     - netmiko >= 2.4.2
 options:
@@ -61,6 +62,11 @@ options:
         description:
             - Command to send to the device
         required: true
+    search:
+        description:
+            - String to search in the output of the command
+        required: false
+        default: ''
 '''
 
 EXAMPLES = '''
@@ -69,10 +75,11 @@ EXAMPLES = '''
     username: admin
     password: switch
     command: show running-directory
+    search: "Running Configuration    : SYNCHRONIZED"
 '''
 
 RETURN = '''
-Output of the command.
+Output of the command and/or an error if the search string is not found.
 '''
 
 from ansible.module_utils.basic import *
@@ -106,7 +113,7 @@ def main():
         ssh_conn.disconnect()
         if module.params['search'] and module.params['search'] not in output:
             module.fail_json(msg="Search string (%s) not in command output" %
-                                 (module.params['search'])) 
+                                 (module.params['search']), output=output) 
         module.exit_json(output=output)
     except (NetMikoAuthenticationException, NetMikoTimeoutException):
         module.fail_json(msg="Failed to connect to device (%s)" %
