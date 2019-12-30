@@ -1,9 +1,9 @@
 ---
 - name: This is a test for ale_aos_ping module
-  hosts: ale
+  hosts: localhost
   connection: local
   roles:
-    - ale_aos
+    - ansible-aos-stdlib
   vars:
     ansible_python_interpreter: "python"
   tasks:
