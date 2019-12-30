@@ -1,0 +1,14 @@
+galaxy_info:
+  author: Gilbert MOISIO
+  description: Ansible role to access OmniSwitch ALE devices
+  license: CC-BY-NC-ND-4.0
+  min_ansible_version: 2.9
+  platforms:
+    - name: aos
+      versions:
+        - all
+  galaxy_tags:
+  - networking
+  - aos
+  - ale
+dependencies: []
