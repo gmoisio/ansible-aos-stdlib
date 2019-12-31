@@ -49,7 +49,7 @@ options:
         description:
             - SSH connection port
         required: false
-        default: '22'
+        default: 22
     username:
         description:
             - Login username

@@ -31,14 +31,13 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 
 DOCUMENTATION = '''
 ---
-module: ale_aos_command
+module: ale_aos_config
 author: Gilbert MOISIO
 version_added: "2.9.2"
-short_description: Send a command to an ALE OmniSwitch device.
+short_description: Send config commands to an ALE OmniSwitch device.
 description:
-    - Connect to an OmniSwitch device and send a command. It can search for a
-      string.
-requirements:
+    - Connect to an OmniSwitch device and send configurations commands.
+      It can take commands from a file or a set list.
     - netmiko >= 2.4.2
 options:
     host:
@@ -49,7 +48,7 @@ options:
         description:
             - SSH connection port
         required: false
-        default: '22'
+        default: 22
     username:
         description:
             - Login username
@@ -58,24 +57,32 @@ options:
         description:
             - Login password
         required: true
-    command:
+    file:
         description:
-            - Command to send to the device
-        required: true
-    search:
-        description:
-            - String to search in the output of the command
+            - Path to the text file with one config command per line
         required: false
         default: ''
+    commands:
+        description:
+            - List of the config commands to run
+        required: false
+        default: []
 '''
 
 EXAMPLES = '''
-- ale_aos_command: 
+- ale_aos_config: 
     host: "{{ inventory_hostname }}"
     username: admin
     password: switch
-    command: show running-directory
-    search: "Running Configuration    : SYNCHRONIZED"
+    commands:
+      - vlan 100 enable name test1
+      - vlan 200 enable name test2
+
+- ale_aos_config: 
+    host: "{{ inventory_hostname }}"
+    username: admin
+    password: switch
+    file: commands.txt
 '''
 
 RETURN = '''
@@ -84,8 +91,8 @@ msg:
     returned: On fail
     type: string
 output:
-    description: Output returned by the command
-    returned: On exit and on fail if the search string is not found
+    description: Output returned from the commands
+    returned: On exit
     type: string
 '''
 
@@ -115,22 +122,17 @@ def main():
         'password': module.params['password'],
     }
 
+    if not module.params['commands'] and not module.params['file']:
+        module.fail_json(msg="No commands nor file provided")
+
     try:
         ssh_conn = ConnectHandler(**net_device)
-        if module.params['config'] == 'set':
-            if module.params['commands']:
-                output = ssh_conn.send_config_set(config_commands=\
-                                                  module.params['commands'])
-            else:
-                module.fail_json(msg="No commands defined for set config")
-        elif module.params['config'] == 'file':
-            if module.params['file']:
-                output = ssh_conn.send_config_from_file(config_file=\
-                                                        module.params['file'])
-            else:
-                module.fail_json(msg="No command file for file config")
-        else:
-            module.fail_json(msg="Config value must be 'set' or 'file'")
+        if module.params['commands']:
+            output = ssh_conn.send_config_set(config_commands=\
+                                              module.params['commands'])
+        elif module.params['file']:
+            output = ssh_conn.send_config_from_file(config_file=\
+                                                    module.params['file'])
         ssh_conn.disconnect()
         module.exit_json(output=output)
     except (NetMikoAuthenticationException, NetMikoTimeoutException):
