@@ -97,19 +97,19 @@ def main():
 
     module = AnsibleModule(
         argument_spec=dict(
-            host=dict(required=True),
-            port=dict(required=False, default='22'),
-            username=dict(required=True),
-            password=dict(required=True, no_log=True),
-            command=dict(required=True),
-            search=dict(required=False, default=''),
+            host=dict(type=str, equired=True),
+            port=dict(type=int, required=False, default=22),
+            username=dict(type=str, required=True),
+            password=dict(type=str, required=True, no_log=True),
+            command=dict(type=str, required=True),
+            search=dict(type=str, required=False, default=''),
         ),
         supports_check_mode=False)
 
     net_device = {
         'device_type': 'alcatel_aos',
         'ip': module.params['host'],
-        'port': int(module.params['port']),
+        'port': module.params['port'],
         'username': module.params['username'],
         'password': module.params['password'],
     }

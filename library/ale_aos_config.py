@@ -31,13 +31,13 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 
 DOCUMENTATION = '''
 ---
-module: ale_aos_ping
+module: ale_aos_command
 author: Gilbert MOISIO
 version_added: "2.9.2"
-short_description: Check SSH connectivity for an ALE OmniSwitch device.
+short_description: Send a command to an ALE OmniSwitch device.
 description:
-    - Try to connect to an OmniSwitch device. The module check to see is the
-      check_string is present in the output returned by find_prompt().
+    - Connect to an OmniSwitch device and send a command. It can search for a
+      string.
 requirements:
     - netmiko >= 2.4.2
 options:
@@ -58,35 +58,39 @@ options:
         description:
             - Login password
         required: true
-    check_string:
+    command:
         description:
-            - String to check in the returned prompt
+            - Command to send to the device
+        required: true
+    search:
+        description:
+            - String to search in the output of the command
         required: false
-        default: '>'
+        default: ''
 '''
 
 EXAMPLES = '''
-- ale_aos_ping: 
+- ale_aos_command: 
     host: "{{ inventory_hostname }}"
     username: admin
     password: switch
+    command: show running-directory
+    search: "Running Configuration    : SYNCHRONIZED"
 '''
 
 RETURN = '''
 msg:
-    description: Message
-    returned: On exit and on fail
+    description: Error message
+    returned: On fail
     type: string
 output:
-    description: Output returned by find_prompt()
-    returned: On fail if check_string is not found
+    description: Output returned by the command
+    returned: On exit and on fail if the search string is not found
     type: string
-
-Status and completion message that can be displayed with debug var.
 '''
 
 from ansible.module_utils.basic import *
-from netmiko import ConnectHandler
+from netmiko import ConnectHandler, file_transfer
 from netmiko.ssh_exception import *
 
 def main():
@@ -97,7 +101,9 @@ def main():
             port=dict(type=int, required=False, default=22),
             username=dict(type=str, required=True),
             password=dict(type=str, required=True, no_log=True),
-            check_string=dict(type=str, required=False, default='>'),
+            config=dict(type=str, required=False, default='set'),
+            file=dict(type=str, required=False, default=''),
+            commands=dict(type=list, required=False, default=[]),
         ),
         supports_check_mode=False)
 
@@ -107,18 +113,26 @@ def main():
         'port': module.params['port'],
         'username': module.params['username'],
         'password': module.params['password'],
-        'timeout': 10,
     }
 
     try:
         ssh_conn = ConnectHandler(**net_device)
-        output = ssh_conn.find_prompt()
-        ssh_conn.disconnect()
-        if module.params['check_string'] in output:
-            module.exit_json(msg="SSH connection completed successfully")
+        if module.params['config'] == 'set':
+            if module.params['commands']:
+                output = ssh_conn.send_config_set(config_commands=\
+                                                  module.params['commands'])
+            else:
+                module.fail_json(msg="No commands defined for set config")
+        elif module.params['config'] == 'file':
+            if module.params['file']:
+                output = ssh_conn.send_config_from_file(config_file=\
+                                                        module.params['file'])
+            else:
+                module.fail_json(msg="No command file for file config")
         else:
-            module.fail_json(msg="Failed to detect check_string in output",
-                            output=output)
+            module.fail_json(msg="Config value must be 'set' or 'file'")
+        ssh_conn.disconnect()
+        module.exit_json(output=output)
     except (NetMikoAuthenticationException, NetMikoTimeoutException):
         module.fail_json(msg="Failed to connect to device (%s)" %
                              (module.params['host']))
