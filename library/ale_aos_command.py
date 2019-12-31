@@ -33,7 +33,7 @@ DOCUMENTATION = '''
 ---
 module: ale_aos_command
 author: Gilbert MOISIO
-version_added: "0.1.2"
+version_added: "2.9.2"
 short_description: Send a command to an ALE OmniSwitch device.
 description:
     - Connect to an OmniSwitch device and send a command. It can search for a
@@ -79,7 +79,14 @@ EXAMPLES = '''
 '''
 
 RETURN = '''
-Output of the command and/or an error if the search string is not found.
+msg:
+    description: Error message
+    returned: On fail
+    type: string
+output:
+    description: Output returned by the command
+    returned: On exit and on fail if the search string is not found
+    type: string
 '''
 
 from ansible.module_utils.basic import *

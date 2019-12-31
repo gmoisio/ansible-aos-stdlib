@@ -9,7 +9,7 @@ An Ansible role to access Alcatel-Lucent Enterprise OmniSwitch devices.
 Requirements
 ------------
 
-Requires netmiko >= 2.9
+Requires ansible >= 2.9.2 and netmiko >= 2.4.2
 
 Example Playbook
 ----------------
