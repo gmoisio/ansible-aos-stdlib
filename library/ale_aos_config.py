@@ -97,7 +97,7 @@ output:
 '''
 
 from ansible.module_utils.basic import *
-from netmiko import ConnectHandler, file_transfer
+from netmiko import ConnectHandler
 from netmiko.ssh_exception import *
 
 def main():
@@ -108,9 +108,8 @@ def main():
             port=dict(type=int, required=False, default=22),
             username=dict(type=str, required=True),
             password=dict(type=str, required=True, no_log=True),
-            config=dict(type=str, required=False, default='set'),
-            file=dict(type=str, required=False, default=''),
-            commands=dict(type=list, required=False, default=[]),
+            file=dict(type=str, required=False, default=None),
+            commands=dict(type=list, required=False, default=None),
         ),
         supports_check_mode=False)
 
@@ -134,6 +133,8 @@ def main():
             output = ssh_conn.send_config_from_file(config_file=\
                                                     module.params['file'])
         ssh_conn.disconnect()
+        if 'ERROR' in output:
+            module.fail_json(msg="Error in a command execution", output=output)            
         module.exit_json(output=output)
     except (NetMikoAuthenticationException, NetMikoTimeoutException):
         module.fail_json(msg="Failed to connect to device (%s)" %

@@ -32,6 +32,13 @@ Example Playbook
     - debug: var=result 
 ~~~~
 
+Add below setting to your ansible.cfg and get a better display:
+
+~~~~
+[defaults]
+stdout_callback = yaml
+~~~~
+
 License
 -------
 

@@ -102,7 +102,7 @@ def main():
             username=dict(type=str, required=True),
             password=dict(type=str, required=True, no_log=True),
             command=dict(type=str, required=True),
-            search=dict(type=str, required=False, default=''),
+            search=dict(type=str, required=False, default=None),
         ),
         supports_check_mode=False)
 
@@ -120,7 +120,9 @@ def main():
         ssh_conn.disconnect()
         if module.params['search'] and module.params['search'] not in output:
             module.fail_json(msg="Search string (%s) not in command output" %
-                                 (module.params['search']), output=output) 
+                                 (module.params['search']), output=output)
+        if 'ERROR' in output:
+            module.fail_json(msg="Error in command execution", output=output)            
         module.exit_json(output=output)
     except (NetMikoAuthenticationException, NetMikoTimeoutException):
         module.fail_json(msg="Failed to connect to device (%s)" %
