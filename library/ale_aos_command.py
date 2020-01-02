@@ -118,11 +118,11 @@ def main():
         ssh_conn = ConnectHandler(**net_device)
         output = ssh_conn.send_command(module.params['command'])
         ssh_conn.disconnect()
+        if 'ERROR' in output:
+            module.fail_json(msg="Error in command execution", output=output)            
         if module.params['search'] and module.params['search'] not in output:
             module.fail_json(msg="Search string (%s) not in command output" %
                                  (module.params['search']), output=output)
-        if 'ERROR' in output:
-            module.fail_json(msg="Error in command execution", output=output)            
         module.exit_json(output=output)
     except (NetMikoAuthenticationException, NetMikoTimeoutException):
         module.fail_json(msg="Failed to connect to device (%s)" %
