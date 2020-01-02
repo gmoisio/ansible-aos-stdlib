@@ -65,6 +65,7 @@ options:
     search:
         description:
             - String to search in the output of the command
+              to validate the proper execution
         required: false
         default: ''
 '''
