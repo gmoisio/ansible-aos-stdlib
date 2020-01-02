@@ -117,7 +117,8 @@ def main():
         if module.params['check_string'] in output:
             module.exit_json(msg="SSH connection completed successfully")
         else:
-            module.fail_json(msg="Failed to detect check_string in output",
+            module.fail_json(msg="Failed to detect '%s' in output" %
+                            module.params['check_string'],
                             output=output)
     except (NetMikoAuthenticationException, NetMikoTimeoutException):
         module.fail_json(msg="Failed to connect to device (%s)" %
