@@ -68,6 +68,11 @@ options:
               to validate the proper execution
         required: false
         default: ''
+    timing:
+        description:
+            - Boolean to run send_command_timing instead of send_command
+        required: false
+        default: false
 '''
 
 EXAMPLES = '''
@@ -104,6 +109,7 @@ def main():
             password=dict(type=str, required=True, no_log=True),
             command=dict(type=str, required=True),
             search=dict(type=str, required=False, default=None),
+            timing=dict(type=bool, required=False, default=False),
         ),
         supports_check_mode=False)
 
@@ -117,7 +123,10 @@ def main():
 
     try:
         ssh_conn = ConnectHandler(**net_device)
-        output = ssh_conn.send_command(module.params['command'])
+        if module.params['timing']:
+            output = ssh_conn.send_command_timing(module.params['command'])
+        else:
+            output = ssh_conn.send_command(module.params['command'])
         ssh_conn.disconnect()
         if 'ERROR' in output:
             module.fail_json(msg="Error in command execution", output=output)            
