@@ -73,6 +73,11 @@ options:
             - Boolean to save and synchronize memories after changes success
         required: false
         default: false
+    backup:
+        description:
+            - Boolean to backup configuration in backups/file before changes
+        required: false
+        default: false
 '''
 
 EXAMPLES = '''
@@ -105,6 +110,8 @@ output:
 from ansible.module_utils.basic import *
 from netmiko import ConnectHandler
 from netmiko.ssh_exception import *
+from datetime import datetime
+from pathlib import Path
 
 
 def error_exec(output):
@@ -117,6 +124,14 @@ def diff_config(output):
     if output['snapshot_before'] != output['snapshot_after']:
         return True
 
+
+def backup_config(output, hostname):
+    out_filename = hostname + '_' + datetime.now().strftime('%Y-%m-%d_%H:%M:%S') + '.conf'
+    path_dir = Path('backups')
+    path_dir.mkdir(exist_ok=True)
+    with open(path_dir / out_filename, 'w') as out_file:
+       out_file.write(output['snapshot_before'])
+    return True
 
 def main():
 
@@ -131,6 +146,7 @@ def main():
             file=dict(type=str, required=False, default=None),
             commands=dict(type=list, required=False, default=None),
             save=dict(type=bool, required=False, default=False),
+            backup=dict(type=bool, required=False, default=False),
         ),
         supports_check_mode=False)
 
@@ -145,9 +161,12 @@ def main():
     if not module.params['commands'] and not module.params['file']:
         module.fail_json(msg="No commands nor file provided")
 
+
     try:
         ssh_conn = ConnectHandler(**net_device)
         output['snapshot_before'] = ssh_conn.send_command_timing('show configuration snapshot')
+        if module.params['backup']:
+            backup_config(output, module.params['host'])
         if module.params['commands']:
             output['command'] = ssh_conn.send_config_set(config_commands=\
                                               module.params['commands'])

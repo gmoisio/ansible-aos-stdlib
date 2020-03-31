@@ -174,6 +174,11 @@ options:
             - Boolean to save and synchronize memories after changes success
         required: false
         default: false
+    backup:
+        description:
+            - Boolean to backup configuration in a file before changes
+        required: false
+        default: false
 
 
 EXAMPLES
