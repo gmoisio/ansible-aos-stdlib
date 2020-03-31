@@ -38,6 +38,7 @@ short_description: Send config commands to an ALE OmniSwitch device.
 description:
     - Connect to an OmniSwitch device and send configurations commands.
       It can take commands from a file or a commands list.
+requirements:
     - netmiko >= 2.4.2
 options:
     host:
@@ -67,6 +68,11 @@ options:
             - List of the config commands to run
         required: false
         default: []
+    save:
+        description:
+            - Boolean to save and synchronize memories after changes success
+        required: false
+        default: false
 '''
 
 EXAMPLES = '''
@@ -100,7 +106,21 @@ from ansible.module_utils.basic import *
 from netmiko import ConnectHandler
 from netmiko.ssh_exception import *
 
+
+def error_exec(output):
+    for key, value in output.items():
+        if 'ERROR' in value:
+            return True
+
+
+def diff_config(output):
+    if output['snapshot_before'] != output['snapshot_after']:
+        return True
+
+
 def main():
+
+    output = {}
 
     module = AnsibleModule(
         argument_spec=dict(
@@ -110,6 +130,7 @@ def main():
             password=dict(type=str, required=True, no_log=True),
             file=dict(type=str, required=False, default=None),
             commands=dict(type=list, required=False, default=None),
+            save=dict(type=bool, required=False, default=False),
         ),
         supports_check_mode=False)
 
@@ -126,16 +147,23 @@ def main():
 
     try:
         ssh_conn = ConnectHandler(**net_device)
+        output['snapshot_before'] = ssh_conn.send_command_timing('show configuration snapshot')
         if module.params['commands']:
-            output = ssh_conn.send_config_set(config_commands=\
+            output['command'] = ssh_conn.send_config_set(config_commands=\
                                               module.params['commands'])
         elif module.params['file']:
-            output = ssh_conn.send_config_from_file(config_file=\
+            output['command'] = ssh_conn.send_config_from_file(config_file=\
                                                     module.params['file'])
+        output['snapshot_after'] = ssh_conn.send_command_timing('show configuration snapshot')
+        if not error_exec(output) and diff_config(output) and module.params['save']:
+            ssh_conn.save_config()
         ssh_conn.disconnect()
-        if 'ERROR' in output:
-            module.fail_json(msg="Error in a command execution", output=output)            
-        module.exit_json(output=output)
+        if error_exec(output):
+            module.fail_json(msg="Error in a command execution", output=output)
+        elif diff_config(output):
+            module.exit_json(changed=True, output=output['command'])
+        else:
+            module.exit_json(output=output['command'])
     except (NetMikoAuthenticationException, NetMikoTimeoutException):
         module.fail_json(msg="Failed to connect to device (%s)" %
                              (module.params['host']))

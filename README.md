@@ -139,6 +139,7 @@ short_description: Send config commands to an ALE OmniSwitch device.
 description:
     - Connect to an OmniSwitch device and send configurations commands.
       It can take commands from a file or a commands list.
+requirements:
     - netmiko >= 2.4.2
 options:
     host:
@@ -168,6 +169,11 @@ options:
             - List of the config commands to run
         required: false
         default: []
+    save:
+        description:
+            - Boolean to save and synchronize memories after changes success
+        required: false
+        default: false
 
 
 EXAMPLES
