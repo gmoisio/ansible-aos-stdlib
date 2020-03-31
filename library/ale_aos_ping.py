@@ -33,7 +33,7 @@ DOCUMENTATION = '''
 ---
 module: ale_aos_ping
 author: Gilbert MOISIO
-version_added: "1.0.0" # of ale_aos role
+version_added: "1.1.0" # of ale_aos role
 short_description: Check SSH connectivity for an ALE OmniSwitch device.
 description:
     - Try to connect to an OmniSwitch device. The module check to see is the
