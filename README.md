@@ -119,7 +119,8 @@ options:
         default: ''
     timing:
         description:
-            - Boolean to run send_command_timing instead of send_command
+            - Boolean to run send_command_timing instead of send_command, useful
+              to avoid the limitation on AOS6 when trying to get the configuration
         required: false
         default: false
 
