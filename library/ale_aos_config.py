@@ -50,6 +50,11 @@ options:
             - SSH connection port
         required: false
         default: 22
+    sshconf:
+        description:
+            - Path to sshconfig to use for connections
+        required: false
+        default: None
     username:
         description:
             - Login username
@@ -85,6 +90,7 @@ EXAMPLES = '''
     host: "{{ inventory_hostname }}"
     username: admin
     password: switch
+    sshconf: ~/.ssh/config
     commands:
       - vlan 100 enable name test1
       - vlan 200 enable name test2
