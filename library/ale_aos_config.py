@@ -50,6 +50,11 @@ options:
             - SSH connection port
         required: false
         default: 22
+    sshconf:
+        description:
+            - Path to sshconfig to use for connections
+        required: false
+        default: None
     username:
         description:
             - Login username
@@ -85,6 +90,7 @@ EXAMPLES = '''
     host: "{{ inventory_hostname }}"
     username: admin
     password: switch
+    sshconf: ~/.ssh/config
     commands:
       - vlan 100 enable name test1
       - vlan 200 enable name test2
@@ -141,6 +147,7 @@ def main():
         argument_spec=dict(
             host=dict(type=str, required=True),
             port=dict(type=int, required=False, default=22),
+            sshconfig=dict(type=str, required=False, default=None),
             username=dict(type=str, required=True),
             password=dict(type=str, required=True, no_log=True),
             file=dict(type=str, required=False, default=None),
@@ -154,6 +161,7 @@ def main():
         'device_type': 'alcatel_aos',
         'ip': module.params['host'],
         'port': module.params['port'],
+        'ssh_config_file': module.params['sshconfig'],
         'username': module.params['username'],
         'password': module.params['password'],
     }
