@@ -118,6 +118,7 @@ from netmiko import ConnectHandler
 from netmiko.ssh_exception import *
 from datetime import datetime
 from pathlib import Path
+from difflib import Differ
 
 
 def error_exec(output):
@@ -188,6 +189,11 @@ def main():
         if error_exec(output):
             module.fail_json(msg="Error in a command execution", output=output)
         elif diff_config(output):
+            if module._diff:
+                d = Differ()
+                diff = d.compare(output['snapshot_before'].splitlines(),
+                        output['snapshot_after'].splitlines())
+                module.exit_json(changed=True, output='\n'.join(diff))
             module.exit_json(changed=True, output=output['command'])
         else:
             module.exit_json(output=output['command'])

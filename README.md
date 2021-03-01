@@ -196,6 +196,8 @@ EXAMPLES
     username: admin
     password: switch
     file: commands.txt
+
+Tip to display differences: ansible-playbook myplaybook.yml --diff -v
 ~~~~
 
 License
