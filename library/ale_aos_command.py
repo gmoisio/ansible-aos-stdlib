@@ -109,7 +109,7 @@ def main():
 
     module = AnsibleModule(
         argument_spec=dict(
-            host=dict(type=str, equired=True),
+            host=dict(type=str, required=True),
             port=dict(type=int, required=False, default=22),
             sshconfig=dict(type=str, required=False, default=None),
             username=dict(type=str, required=True),
