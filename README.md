@@ -6,6 +6,8 @@ ALE_AOS
 
 An Ansible role to access Alcatel-Lucent Enterprise OmniSwitch devices.
 
+**This role is no more maintained. It has been replaced by an [Ansible Collection](https://github.com/gmoisio/gmoisio.ale).**
+
 Requirements
 ------------
 
